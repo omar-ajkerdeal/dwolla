@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Page Title</title>
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+</head>
+
+<body style="background-color:#f5f6fa;">
+
+
+  <script type="text/javascript" src="https://cdn.dwolla.com/v2/dwolla-web.js"></script>
+
+  <!-- <script>
+    dwolla.configure({
+      environment: "sandbox",
+      //  styles: "/main.css",
+      token: (req) => Promise.resolve({ token: `3qNqsPM06ibeAwPwgNizdyjmg71eOA86SLKvrvrHsiGdoqEpbH` }),
+      success: (res) => { },
+      error: (err) => { }
+    });
+  </script> -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script>
+    var currentUser = "b371ad3d-50c7-4fed-85f5-22ee57efad92";
+      var token = "QrYPKXb3PZsLbJ6yIWOe3ZOhaAzrFdFcPzGYVYk4oJhyV5md44"
+    var selectDest = ""
+    $(document).ready(function () {
+      var formbody = {
+        '_links': {
+          'source': {
+            'href': 'https://api-sandbox.dwolla.com/funding-sources/0f93f048-3fa3-49c4-936b-220ff917fad7',
+          },
+          'destination': {
+            'href': 'https://api-sandbox.dwolla.com/funding-sources/a374e5b3-74d6-468e-9b4a-6f165f5f860d',
+          }
+        },
+        'amount': {
+          'currency': 'USD',
+          'value': '1.00'
+        }
+      }
+      // setTimeout(function () {
+      // $.ajax({
+      //   url: "https://api-sandbox.dwolla.com/transfers",
+      //   type: 'POST',
+      //   dataType: 'application/vnd.dwolla.v1.hal+json',
+      //   data: JSON.stringify(formbody),
+      //   headers: {
+      //     'Accept': 'application/vnd.dwolla.v1.hal+json',
+      //     'Authorization': 'Bearer ' + token,
+      //     'Content-Type': 'application/json',
+      //     'Idempotency-Key': '921386bc-852a-44be-b524-38e0ac68b22f',    
+
+      //   },
+      //   contentType: 'application/json; charset=utf-8',
+      //   success: function (result) {
+
+      //   },
+      //   error: function (error) {
+      //     console.log(JSON.stringify(error))
+      //   }
+      // });
+      //}, 3000);
+
+
+      $.ajax({
+        url: "https://api-sandbox.dwolla.com/customers/" + currentUser + "/funding-sources?removed=false",
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+          'Accept': 'application/vnd.dwolla.v1.hal+json',
+          'Authorization': 'Bearer ' + token,
+        },
+        contentType: 'application/json; charset=utf-8',
+        success: function (result) {
+          var fundingSourceList = '';
+          for (const [key, value] of Object.entries(result._embedded['funding-sources'])) {
+
+            fundingSourceList += `<option value='${value.id}'>${value.name}</option>`
+          }
+          $("#fundingSourceList").html(fundingSourceList);
+        },
+        error: function (error) {
+
+        }
+      });
+
+
+      $.ajax({
+        url: "https://api-sandbox.dwolla.com/customers",
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+          'Accept': 'application/vnd.dwolla.v1.hal+json',
+          'Authorization': 'Bearer ' + token
+        },
+        contentType: 'application/json; charset=utf-8',
+        success: function (result) {
+          var customerList = '';
+          for (const [key, value] of Object.entries(result._embedded['customers'])) {
+            if (value.id != currentUser && value.status == "verified") {
+              customerList += `<option value='${value.id}'>${value.firstName} ${value.lastName}</option>`
+            }
+          }
+          $("#customerList").html(customerList);
+        },
+        error: function (error) {
+
+        }
+      });
+      TransferFundToCustomer = (srcFund, desFund) => {
+        var formbody =
+        {
+          "_links": {
+            "source": {
+              "href": "https://api-sandbox.dwolla.com/funding-sources/0f93f048-3fa3-49c4-936b-220ff917fad7"
+            },
+            "destination": {
+              "href": "https://api-sandbox.dwolla.com/funding-sources/a374e5b3-74d6-468e-9b4a-6f165f5f860d"
+            }
+          },
+          "amount": {
+            "currency": "USD",
+            "value": "1.00"
+          }
+        }
+
+          $.ajax({
+           url: "https://api-sandbox.dwolla.com/transfers",
+           type: 'POST',
+           //dataType: 'json',
+           data: formbody,
+           headers: {
+             'Accept': '*/*',
+             'Authorization': 'Bearer ' + token,
+             'Content-Type': 'application/json',
+             'Idempotency-Key': '921386bc-852a-44be-b524-38e0ac68b22f',
+             
+             //'Access-Control-Allow-Origin': 'http://localhost:51460/',
+             'Access-Control-Allow-Methods': 'POST, GET',
+             //'Status': '200',
+             'Access-Control-Allow-Headers': 'Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With',
+             //"Access-Control-Allow-Headers": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+           },
+           //contentType: 'application/json; charset=utf-8',
+           success: function (result) {
+             console.log(result.getAllResponseHeaders());
+           },
+           error: function (error) {
+             console.log(error);
+           }
+         });
+
+
+
+
+        
+
+      }
+      getFundSourceIdCustomerWise = (customerID) => {
+        $.ajax({
+          url: "https://api-sandbox.dwolla.com/customers/" + customerID + "/funding-sources?removed=false",
+          type: 'GET',
+          dataType: 'json',
+          async: false,
+          headers: {
+            'Accept': 'application/vnd.dwolla.v1.hal+json',
+            'Authorization': 'Bearer ' + token,
+
+          },
+          contentType: 'application/json; charset=utf-8',
+          success: function (result) {
+            //console.log(JSON.stringify(result))
+            var fundingSourceList = '';
+            for (const [key, value] of Object.entries(result._embedded['funding-sources'])) {
+              if (value.name == "Balance") {
+                return value.id
+              }
+              //console.log(value.name)
+            }
+          },
+          error: function (error) {
+
+          }
+        });
+
+      }
+
+      // $("#payment").click(function () {
+      //  console.log("f")
+      //  TransferFundToCustomer($("#fundingSourceList").val(), getFundSourceIdCustomerWise($("#customerList").val()))
+      // });
+      // console.log($("#fundingSourceList").val())
+      // console.log($("#customerList").val())
+      $("#payment").on('click', function () {
+        //console.log(getFundSourceIdCustomerWise($("#customerList").val()));
+        TransferFundToCustomer($("#fundingSourceList").val(), getFundSourceIdCustomerWise($("#customerList").val()))
+      });
+    })
+  </script>
+
+  <div class="container">
+    <div class="row " style="margin-top: 30vh;">
+      <div class="col-md-4 offset-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h3 class="card-title text-center">Payment</h3>
+
+
+            <div class="mb-3">
+              <label class="form-label">Select Funding Source </label>
+              <select class="form-select" id="fundingSourceList">
+                <option>Loading Source</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Destination </label>
+              <select class="form-select" id="customerList">
+                <option>Loading Customer</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Enter Ammount </label>
+              <input type="number" class="form-control" min='0' value="0" placeholder="Ammount">
+            </div>
+            <button type="button" class="btn btn-success" id="payment">Make Payment</button>
+
+
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+      <!-- <dwolla-customer-create>
+              
+          
+            </dwolla-customer-create> 
+           <dwolla-payin-submit></dwolla-payin-submit> -->
+      <!-- <dwolla-balance-display 
+            customerId="d27f02df-4b66-43f2-ad50-6a8200961a5c">     
+        </dwolla-balance-display> -->
+
+
+      <!-- <dwolla-customer-update 
+                    customerId="d27f02df-4b66-43f2-ad50-6a8200961a5c"
+                    firstName=”firstName”
+                    lastName=”lastName”
+                    email=”email”
+                    terms=”https://www.yourterms.com”
+                    privacy=”https://www.yourprivacy.com”>       
+             </dwolla-customer-update> -->
+
+    </div>
+  </div>
+</body>
+
+</html>
